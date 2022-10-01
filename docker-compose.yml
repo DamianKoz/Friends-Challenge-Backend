@@ -1,0 +1,13 @@
+version: "1"
+
+services:
+  challenge-server:
+    build:
+      context: .
+    container_name: challenge_server
+    hostname: challenge_server
+    ports:
+      - 8080:8080
+    deploy:
+      restart_policy:
+        condition: on-failure
