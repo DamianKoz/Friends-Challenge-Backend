@@ -17,10 +17,9 @@ COPY go.* ./
 RUN go mod download
 
 # Copy local code to the container image.
-COPY *.go ./
+COPY . ./
 
-
-RUN go build -o /challenge-server
+RUN  go build -o /challenge-server ./application/web/ 
 
 ## Deploy
 FROM alpine:latest 
