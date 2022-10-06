@@ -1,9 +1,16 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 	"time"
+)
+
+var (
+	FlagSrcFolder  = flag.String("src", "./pages/", "blog folder")
+	FlagStaticF    = flag.String("static", "./ui/static/", "static folder")
+	FlagTmplFolder = flag.String("tmpl", "./templates/", "template folder")
 )
 
 type Challenge struct {
@@ -56,6 +63,10 @@ func main() {
 	port := ":8080"
 
 	mux := http.NewServeMux()
+
+	fileserver := http.FileServer(http.Dir("./ui/static/"))
+
+	mux.Handle("/static/", http.StripPrefix("/static", fileserver))
 	mux.HandleFunc("/", home)
 	mux.HandleFunc("/challenge/create", challengeCreate)
 	mux.HandleFunc("/challenge/view", ChallengeView)

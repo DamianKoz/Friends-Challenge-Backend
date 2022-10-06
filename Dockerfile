@@ -17,7 +17,7 @@ COPY go.* ./
 RUN go mod download
 
 # Copy local code to the container image.
-COPY . ./
+COPY . .
 
 RUN  go build -o /challenge-server ./application/web/ 
 
@@ -27,7 +27,7 @@ FROM alpine:latest
 WORKDIR /
 
 COPY --from=build /challenge-server /challenge-server 
-
+# Need to Copy HTML Files etc.
 EXPOSE 8080
 
 ENTRYPOINT ["./challenge-server"]
