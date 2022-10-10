@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -12,6 +13,10 @@ var (
 	FlagStaticF    = flag.String("static", "./ui/static/", "static folder")
 	FlagTmplFolder = flag.String("tmpl", "./templates/", "template folder")
 )
+
+type config struct {
+	addr string
+}
 
 type Challenge struct {
 	ID           uint
@@ -59,20 +64,19 @@ type Task struct {
 
 type Tasks []Task
 
+var cfg config
+
 func main() {
-	port := ":8080"
+	flag.StringVar(&cfg.addr, "addr", ":8080", "HTTP network address")
+	flag.Parse()
 
-	mux := http.NewServeMux()
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	fileserver := http.FileServer(http.Dir("./ui/static/"))
+	mux := routes()
 
-	mux.Handle("/static/", http.StripPrefix("/static", fileserver))
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/challenge/create", challengeCreate)
-	mux.HandleFunc("/challenge/view", ChallengeView)
-
-	log.Println("Starting Server on " + port)
-	err := http.ListenAndServe(port, mux)
-	log.Fatal(err)
+	infoLog.Printf("Starting Server on http://localhost" + cfg.addr)
+	err := http.ListenAndServe(cfg.addr, mux)
+	errorLog.Fatal(err)
 
 }
