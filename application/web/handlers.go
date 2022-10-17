@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -49,4 +50,63 @@ func challengeCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write([]byte("Creating Challenge"))
+}
+
+func (app *application) userCreate(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.Header().Set("Allow", http.MethodPost)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	firstName := "Julian"
+	lastName := "Fritz"
+
+	id, err := app.user.Insert(firstName, lastName)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, fmt.Sprintf("/user/view?id=%d", id), http.StatusSeeOther)
+}
+
+func (app *application) userView(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil {
+		http.Error(w, "Invalid ID. ERROR:"+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	user, err := app.user.Get(id)
+	if err != nil {
+		http.Error(w, "Could not Get User. ERROR: "+err.Error(), http.StatusNotFound)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(user)
+	// fmt.Fprintf(w, "Found User with ID %v: %+v", id, user)
+
+}
+
+func (app *application) allUsers(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("Fetching all users...\n")
+	users, err := app.user.GetAll()
+	if err != nil {
+		http.Error(w, "Error occurred while fetching all users"+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Printf("Successfully fetched all users\n")
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(users)
+
+	// json, _ := json.Marshal(users)
+	// w.Write(json)
+
+	// fmt.Fprintf(w, "\nAll Users:\n")
+	// for _, user := range users {
+	// 	fmt.Fprintf(w, "User: %v, %v \n", user.FirstName, user.LastName)
+	// }
 }

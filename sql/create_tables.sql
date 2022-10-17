@@ -1,13 +1,13 @@
 CREATE TABLE user(
 	id int PRIMARY KEY AUTO_INCREMENT, 
+  first_name VARCHAR(50) NOT NULL DEFAULT '',
+  last_name VARCHAR(50) NOT NULL DEFAULT '',
   user_level INT DEFAULT 1, 
   exp int DEFAULT 0,
-  firstName varchar(50),
-  lastName varchar(50),
-  age int,
-  gender text,
-  email text,
-  updatedAt timestamp,
+  age int NOT NULL DEFAULT 0,
+  gender text NOT NULL,
+  email text NOT NULL,
+  updated_at timestamp,
   created_at timestamp 
 );
 

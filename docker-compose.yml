@@ -1,10 +1,11 @@
 version: "1"
 
 services:
-  challenge-server:
+  web:
     build:
       context: .
-    container_name: challenge_server
+      dockerfile: Dockerfile
+    container_name: friends-challenge-api
     hostname: challenge_server
     ports:
       - 8080:8080

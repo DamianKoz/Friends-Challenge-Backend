@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/damiankoz/friends_challenge/application/internal/models"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -33,9 +34,13 @@ func openDb(dsn string) (*sql.DB, error) {
 	return db, nil
 }
 
+type application struct {
+	user *models.UserModel
+}
+
 func main() {
 	flag.StringVar(&cfg.addr, "addr", ":8080", "HTTP network address")
-	dsn := flag.String("dsn", "web:Korona11@/friends_challenge?parseTime=true", "MySQL data source name")
+	dsn := flag.String("dsn", "web:Korona11@tcp(host.docker.internal:3306)/friends_challenge?parseTime=true", "MySQL data source name")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
@@ -47,7 +52,11 @@ func main() {
 	}
 	defer db.Close()
 
-	mux := routes()
+	app := &application{
+		user: &models.UserModel{DB: db},
+	}
+
+	mux := app.routes()
 
 	infoLog.Printf("Starting Server on http://localhost" + cfg.addr)
 	err = http.ListenAndServe(cfg.addr, mux)
