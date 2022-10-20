@@ -31,6 +31,21 @@ import (
 // 	}
 // }
 
+type greeting struct {
+	Message string
+	Status  bool
+}
+
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
+	ans := greeting{Message: "Api is working :)", Status: true}
+
+	json.NewEncoder(w).Encode(ans)
+}
+
 func ChallengeView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil {

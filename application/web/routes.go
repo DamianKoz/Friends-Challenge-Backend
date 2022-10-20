@@ -11,7 +11,7 @@ func (app *application) routes() http.Handler {
 
 	// fileserver := http.FileServer(http.Dir("./ui/static/"))
 	// mux.Handle("/static/", http.StripPrefix("/static", fileserver))
-	// mux.HandleFunc("/", home)
+	mux.HandleFunc("/", app.home)
 
 	mux.HandleFunc("/challenge/create", challengeCreate)
 	mux.HandleFunc("/challenge/view", ChallengeView)
