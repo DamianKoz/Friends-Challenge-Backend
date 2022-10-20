@@ -3,25 +3,35 @@ package main
 import (
 	"net/http"
 
+	"github.com/julienschmidt/httprouter"
 	"github.com/justinas/alice"
 )
 
 func (app *application) routes() http.Handler {
-	mux := http.NewServeMux()
+	GET := http.MethodGet
+	POST := http.MethodPost
 
-	// fileserver := http.FileServer(http.Dir("./ui/static/"))
-	// mux.Handle("/static/", http.StripPrefix("/static", fileserver))
-	mux.HandleFunc("/", app.home)
+	router := httprouter.New()
 
-	mux.HandleFunc("/challenge/create", challengeCreate)
-	mux.HandleFunc("/challenge/view", ChallengeView)
+	// Home -> Inital Welcoming
+	router.HandlerFunc(GET, "/", app.home)
 
-	mux.HandleFunc("/user/create", app.userCreate)
-	mux.HandleFunc("/user/view", app.userView)
-	mux.HandleFunc("/users", app.allUsers)
+	// Routes for challenges
+	router.HandlerFunc(GET, "/challenge/create", app.challengeCreate)
+	router.HandlerFunc(POST, "/challenge/create", app.challengeCreatePost)
+	router.HandlerFunc(GET, "/challenge/view/:id", app.ChallengeView)
+
+	// Routes for users
+	router.HandlerFunc(GET, "/user/signup", app.userCreate)
+	router.HandlerFunc(POST, "/user/signup", app.userCreatePost)
+	router.HandlerFunc(GET, "/user/login", app.userLogin)
+	router.HandlerFunc(POST, "/user/login", app.userLoginPost)
+	router.HandlerFunc(POST, "/user/logout", app.userLogoutPost)
+	router.HandlerFunc(GET, "/user/view/:id", app.userView)
+	router.HandlerFunc(GET, "/user/all", app.allUsers)
 
 	standard := alice.New(app.logRequest, secureHeaders)
-	return standard.Then(mux)
+	return standard.Then(router)
 
 	// return app.logRequest(secureHeaders(mux)) -> Same as above
 }

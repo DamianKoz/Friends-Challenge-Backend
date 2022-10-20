@@ -5,31 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/julienschmidt/httprouter"
 )
-
-// func home(w http.ResponseWriter, r *http.Request) {
-// 	if r.URL.Path != "/" {
-// 		http.NotFound(w, r)
-// 		return
-// 	}
-// 	// Create a slice with all the paths to the needed files
-// 	files := []string{"./ui/html/templates/base.tmpl.html", "./ui/html/pages/index.html", "./ui/html/partials/nav.tmpl.html"}
-
-// 	// Use the template.ParseFiles() function to read the template file into a template set.
-// 	ts, err := template.ParseFiles(files...)
-// 	if err != nil {
-// 		log.Print(err.Error())
-// 		http.Error(w, "Internal Server Error", 500)
-// 		return
-// 	}
-// 	// We then use the Execute() method on the template set to write the template content as the response body.
-// 	// The last parameter to Execute() represents any dynamic data that we want to pass in.
-// 	err = ts.ExecuteTemplate(w, "base", nil)
-// 	if err != nil {
-// 		log.Print(err.Error())
-// 		http.Error(w, "Internal Server Error", 500)
-// 	}
-// }
 
 type greeting struct {
 	Message string
@@ -37,17 +15,18 @@ type greeting struct {
 }
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
-	}
-	ans := greeting{Message: "Api is working :)", Status: true}
+	// Returns an inital greeting to check, whether the API is working
+	answer := greeting{Message: "Api is working :)", Status: true}
 
-	json.NewEncoder(w).Encode(ans)
+	json.NewEncoder(w).Encode(answer)
 }
 
-func ChallengeView(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+func (app *application) ChallengeView(w http.ResponseWriter, r *http.Request) {
+	// Return a challenge which corresponds to the id from the url
+
+	params := httprouter.ParamsFromContext(r.Context())
+
+	id, err := strconv.Atoi(params.ByName("id"))
 	if err != nil {
 		http.NotFound(w, r)
 		return
@@ -56,13 +35,17 @@ func ChallengeView(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func challengeCreate(w http.ResponseWriter, r *http.Request) {
+func (app *application) challengeCreate(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.Header().Set("Allow", http.MethodPost)
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	w.Write([]byte("Creating Challenge"))
+	w.Write([]byte("Giving FORM to create new Challenge"))
+}
+
+func (app *application) challengeCreatePost(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Created Challenge with Form Data"))
 }
 
 func (app *application) userCreate(w http.ResponseWriter, r *http.Request) {
@@ -82,11 +65,23 @@ func (app *application) userCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	http.Redirect(w, r, fmt.Sprintf("/user/view?id=%d", id), http.StatusSeeOther)
 }
+func (app *application) userCreatePost(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Displaying User Creation Form"))
+
+	// id, err := app.user.Insert(firstName, lastName)
+	// if err != nil {
+	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	// 	return
+	// }
+	// http.Redirect(w, r, fmt.Sprintf("/user/view?id=%d", id), http.StatusSeeOther)
+}
 
 func (app *application) userView(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
-	if err != nil {
-		http.Error(w, "Invalid ID. ERROR:"+err.Error(), http.StatusInternalServerError)
+	params := httprouter.ParamsFromContext(r.Context())
+	id, err := strconv.Atoi(params.ByName("id"))
+
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
 		return
 	}
 
@@ -97,8 +92,6 @@ func (app *application) userView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(user)
-	// fmt.Fprintf(w, "Found User with ID %v: %+v", id, user)
-
 }
 
 func (app *application) allUsers(w http.ResponseWriter, r *http.Request) {
@@ -120,4 +113,14 @@ func (app *application) allUsers(w http.ResponseWriter, r *http.Request) {
 	// for _, user := range users {
 	// 	fmt.Fprintf(w, "User: %v, %v \n", user.FirstName, user.LastName)
 	// }
+}
+
+func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
+	// Get Method: Display HTML Form for logging in
+}
+func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
+	// Post Method: Authenticate and login the user
+}
+func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
+	// Post Method: Logout the user
 }
