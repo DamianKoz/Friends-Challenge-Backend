@@ -35,12 +35,15 @@ func openDb(dsn string) (*sql.DB, error) {
 }
 
 type application struct {
-	user *models.UserModel
+	infoLog  *log.Logger
+	errorLog *log.Logger
+	user     *models.UserModel
 }
 
 func main() {
 	flag.StringVar(&cfg.addr, "addr", ":8080", "HTTP network address")
-	dsn := flag.String("dsn", "web:Korona11@tcp(host.docker.internal:3306)/friends_challenge?parseTime=true", "MySQL data source name")
+	// For use with Docker: host.docker.internal
+	dsn := flag.String("dsn", "web:Korona11@tcp(127.0.0.1:3306)/friends_challenge?parseTime=true", "MySQL data source name")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
@@ -53,7 +56,9 @@ func main() {
 	defer db.Close()
 
 	app := &application{
-		user: &models.UserModel{DB: db},
+		infoLog:  infoLog,
+		errorLog: errorLog,
+		user:     &models.UserModel{DB: db},
 	}
 
 	mux := app.routes()

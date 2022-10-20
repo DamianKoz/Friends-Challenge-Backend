@@ -3,35 +3,33 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 )
 
-func home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
-	}
-	// Create a slice with all the paths to the needed files
-	files := []string{"./ui/html/templates/base.tmpl.html", "./ui/html/pages/index.html", "./ui/html/partials/nav.tmpl.html"}
+// func home(w http.ResponseWriter, r *http.Request) {
+// 	if r.URL.Path != "/" {
+// 		http.NotFound(w, r)
+// 		return
+// 	}
+// 	// Create a slice with all the paths to the needed files
+// 	files := []string{"./ui/html/templates/base.tmpl.html", "./ui/html/pages/index.html", "./ui/html/partials/nav.tmpl.html"}
 
-	// Use the template.ParseFiles() function to read the template file into a template set.
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		log.Print(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	// We then use the Execute() method on the template set to write the template content as the response body.
-	// The last parameter to Execute() represents any dynamic data that we want to pass in.
-	err = ts.ExecuteTemplate(w, "base", nil)
-	if err != nil {
-		log.Print(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-	}
-}
+// 	// Use the template.ParseFiles() function to read the template file into a template set.
+// 	ts, err := template.ParseFiles(files...)
+// 	if err != nil {
+// 		log.Print(err.Error())
+// 		http.Error(w, "Internal Server Error", 500)
+// 		return
+// 	}
+// 	// We then use the Execute() method on the template set to write the template content as the response body.
+// 	// The last parameter to Execute() represents any dynamic data that we want to pass in.
+// 	err = ts.ExecuteTemplate(w, "base", nil)
+// 	if err != nil {
+// 		log.Print(err.Error())
+// 		http.Error(w, "Internal Server Error", 500)
+// 	}
+// }
 
 func ChallengeView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
@@ -82,7 +80,6 @@ func (app *application) userView(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not Get User. ERROR: "+err.Error(), http.StatusNotFound)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
 
 	json.NewEncoder(w).Encode(user)
 	// fmt.Fprintf(w, "Found User with ID %v: %+v", id, user)
@@ -98,7 +95,6 @@ func (app *application) allUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Printf("Successfully fetched all users\n")
-	w.Header().Set("Content-Type", "application/json")
 
 	json.NewEncoder(w).Encode(users)
 
