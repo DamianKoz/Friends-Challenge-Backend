@@ -38,6 +38,7 @@ type application struct {
 	infoLog  *log.Logger
 	errorLog *log.Logger
 	user     *models.UserModel
+	task     *models.TaskModel
 }
 
 func main() {
@@ -59,6 +60,7 @@ func main() {
 		infoLog:  infoLog,
 		errorLog: errorLog,
 		user:     &models.UserModel{DB: db},
+		task:     &models.TaskModel{DB: db},
 	}
 
 	mux := app.routes()

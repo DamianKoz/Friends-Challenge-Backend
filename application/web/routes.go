@@ -21,10 +21,12 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(POST, "/challenge/create", app.challengeCreatePost)
 	router.HandlerFunc(GET, "/challenge/view/:id", app.ChallengeView)
 
+	// Routes for tasks
+	router.HandlerFunc(POST, "/task/create", app.taskCreate)
+
 	// Routes for users
-	router.HandlerFunc(GET, "/user/signup", app.userCreate)
 	router.HandlerFunc(POST, "/user/signup", app.userCreatePost)
-	router.HandlerFunc(GET, "/user/login", app.userLogin)
+	router.HandlerFunc(GET, "/user/login", app.userLogin) // Delete?
 	router.HandlerFunc(POST, "/user/login", app.userLoginPost)
 	router.HandlerFunc(POST, "/user/logout", app.userLogoutPost)
 	router.HandlerFunc(GET, "/user/view/:id", app.userView)
