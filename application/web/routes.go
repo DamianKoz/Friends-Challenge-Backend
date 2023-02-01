@@ -13,16 +13,16 @@ func (app *application) routes() http.Handler {
 
 	router := httprouter.New()
 
+	// Dynamic Routes with sessions
+	dynamic := alice.New(app.sessionManger.LoadAndSave)
+
 	// Home -> Inital Welcoming
 	router.HandlerFunc(GET, "/", app.home)
 
 	// Routes for challenges
-	router.HandlerFunc(GET, "/challenge/create", app.challengeCreate)
-	router.HandlerFunc(POST, "/challenge/create", app.challengeCreatePost)
-	router.HandlerFunc(GET, "/challenge/view/:id", app.ChallengeView)
-
-	// Routes for tasks
-	router.HandlerFunc(POST, "/task/create", app.taskCreate)
+	router.Handler(POST, "/challenge/create", dynamic.ThenFunc(app.challengeCreate))
+	router.Handler(GET, "/challenge/view/:id", dynamic.ThenFunc(app.ChallengeView))
+	router.Handler(GET, "/challenge/all/", dynamic.ThenFunc(app.AllChallenges))
 
 	// Routes for users
 	router.HandlerFunc(POST, "/user/signup", app.userCreatePost)

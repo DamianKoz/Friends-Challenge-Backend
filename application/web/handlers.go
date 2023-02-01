@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/damiankoz/friends_challenge/application/internal/models"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -23,17 +24,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 // Handlers for Tasks
 
-type taskCreateForm struct {
-	User_ID   int
-	Title     string
-	Verb      string
-	Amount    int
-	Activity  string
-	Time_Unit string
-	Duration  string
-}
-
-func (app *application) taskCreate(w http.ResponseWriter, r *http.Request) {
+func (app *application) challengeCreate(w http.ResponseWriter, r *http.Request) {
 	// Creates a new task. Expects: title, amount, activity, duration, user_id, end_date
 	err := r.ParseForm()
 	if err != nil {
@@ -49,7 +40,7 @@ func (app *application) taskCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	form := taskCreateForm{
+	form := models.Challenge{
 		User_ID:   2, // HARDCODED FOR NOW!!
 		Title:     r.PostForm.Get("task_title"),
 		Verb:      r.PostForm.Get("task_verb"),
@@ -59,7 +50,7 @@ func (app *application) taskCreate(w http.ResponseWriter, r *http.Request) {
 		Amount:    amount,
 	}
 
-	id, err := app.task.Insert(form.Title, form.Verb, form.Amount, form.Activity, form.Duration, form.User_ID, form.Time_Unit)
+	id, err := app.challenge.Insert(form.Title, form.Verb, form.Amount, form.Activity, form.Duration, form.User_ID, form.Time_Unit)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -86,17 +77,18 @@ func (app *application) ChallengeView(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (app *application) challengeCreate(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		w.Header().Set("Allow", http.MethodPost)
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+func (app *application) AllChallenges(w http.ResponseWriter, r *http.Request) {
+
+	challenges, err := app.challenge.GetAll()
+	if err != nil {
+		http.Error(w, "Error occurred while fetching all challenges"+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Write([]byte("Giving FORM to create new Challenge"))
-}
 
-func (app *application) challengeCreatePost(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Created Challenge with Form Data"))
+	fmt.Printf("Successfully fetched all challenges\n")
+
+	json.NewEncoder(w).Encode(challenges)
+	// w.Write([]byte("Created Challenge with Form Data"))
 }
 
 // Handlers for User Management

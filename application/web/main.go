@@ -6,6 +6,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
+
+	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/v2"
 
 	"github.com/damiankoz/friends_challenge/application/internal/models"
 	_ "github.com/go-sql-driver/mysql"
@@ -35,10 +39,11 @@ func openDb(dsn string) (*sql.DB, error) {
 }
 
 type application struct {
-	infoLog  *log.Logger
-	errorLog *log.Logger
-	user     *models.UserModel
-	task     *models.TaskModel
+	infoLog       *log.Logger
+	errorLog      *log.Logger
+	user          *models.UserModel
+	challenge     *models.ChallengeModel
+	sessionManger *scs.SessionManager
 }
 
 func main() {
@@ -56,11 +61,16 @@ func main() {
 	}
 	defer db.Close()
 
+	sessionManager := scs.New()
+	sessionManager.Store = mysqlstore.New(db)
+	sessionManager.Lifetime = 12 * time.Hour
+
 	app := &application{
-		infoLog:  infoLog,
-		errorLog: errorLog,
-		user:     &models.UserModel{DB: db},
-		task:     &models.TaskModel{DB: db},
+		infoLog:       infoLog,
+		errorLog:      errorLog,
+		user:          &models.UserModel{DB: db},
+		challenge:     &models.ChallengeModel{DB: db},
+		sessionManger: sessionManager,
 	}
 
 	mux := app.routes()
